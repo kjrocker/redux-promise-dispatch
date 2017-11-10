@@ -1,0 +1,1 @@
+# redux-promise-dispatch

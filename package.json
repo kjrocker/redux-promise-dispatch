@@ -1,0 +1,16 @@
+{
+  "name": "redux-promise-dispatch",
+  "version": "1.0.0",
+  "description": "Simplifying promises with redux and redux-thunk",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "redux",
+    "redux-thunk",
+    "promises"
+  ],
+  "author": "Kevin Rocker",
+  "license": "MIT"
+}
