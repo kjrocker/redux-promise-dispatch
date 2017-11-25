@@ -1,6 +1,7 @@
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 import { expect } from 'chai';
+import sinon from 'sinon';
 import { promiseDispatcher, createActionCreator } from './index';
 
 const middlewares = [thunk];
@@ -70,6 +71,40 @@ describe('dispatchPromise without the request action', () => {
     const store = mockStore({});
     return store.dispatch(dispatchPromise(3)).then(() => {
       expect(store.getActions()).to.deep.equal(expectedActions);
+    });
+  });
+});
+
+describe('dispatchPromise passes the correct payload params', () => {
+  const simplePromiseSpy = sinon.spy(simplePromise);
+  const promiseRequestSpy = sinon.spy(promiseRequest);
+  const promiseSuccessSpy = sinon.spy(promiseSuccess);
+  const promiseFailureSpy = sinon.spy(promiseFailure);
+  const dispatchPromise = promiseDispatcher(simplePromiseSpy, {
+    request: promiseRequestSpy,
+    success: promiseSuccessSpy,
+    failure: promiseFailureSpy
+  });
+
+  it('passes the same params to the promise and request actions', () => {
+    const store = mockStore({});
+    return store.dispatch(dispatchPromise(2)).then(() => {
+      expect(simplePromiseSpy.calledWith(2)).to.be.true;
+      expect(promiseRequestSpy.calledWith(2)).to.be.true;
+    });
+  });
+
+  it('passes resolve to the success action', () => {
+    const store = mockStore({});
+    return store.dispatch(dispatchPromise(2)).then(() => {
+      expect(promiseSuccessSpy.calledWith('2 is Even!')).to.be.true;
+    });
+  });
+
+  it('passes reject to the failure action', () => {
+    const store = mockStore({});
+    return store.dispatch(dispatchPromise(3)).then(() => {
+      expect(promiseFailureSpy.calledWith('Ouch, 3 is odd!')).to.be.true;
     });
   });
 });
