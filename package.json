@@ -1,6 +1,6 @@
 {
   "name": "redux-promise-dispatch",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Simplifying promises with redux and redux-thunk",
   "main": "./dist/module.js",
   "scripts": {
