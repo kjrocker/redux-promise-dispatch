@@ -1,6 +1,6 @@
 const promiseDispatcher = (fn, { request, success, failure }) => {
   return promiseDispatchCreator(fn, {
-    request: wrapInActionCreator(request),
+    request: request && wrapInActionCreator(request),
     success: wrapInActionCreator(success),
     failure: wrapInActionCreator(failure)
   });
@@ -10,7 +10,7 @@ const promiseDispatcher = (fn, { request, success, failure }) => {
 // Execute the standard (request -> success | failure) action cycle for that api call
 const promiseDispatchCreator = (fn, { request, success, failure }) => (...params) => {
   return dispatch => {
-    dispatch(request(...params));
+    request && dispatch(request(...params));
     return fn(...params)
       .then(response => dispatch(success(response)))
       .catch(error => dispatch(failure(error)));
@@ -25,7 +25,7 @@ const createActionCreator = name => payload => {
 };
 
 const wrapInActionCreator = value => {
-  return typeof value === 'string' ? createActionCreator(value) : value;
+  return typeof value === 'function' ? value : createActionCreator(value);
 };
 
-export { promiseDispatcher, createActionCreator };
+export { promiseDispatcher, createActionCreator, wrapInActionCreator, promiseDispatchCreator };

@@ -9,7 +9,7 @@ var promiseDispatcher = function promiseDispatcher(fn, _ref) {
       failure = _ref.failure;
 
   return promiseDispatchCreator(fn, {
-    request: wrapInActionCreator(request),
+    request: request && wrapInActionCreator(request),
     success: wrapInActionCreator(success),
     failure: wrapInActionCreator(failure)
   });
@@ -27,7 +27,7 @@ var promiseDispatchCreator = function promiseDispatchCreator(fn, _ref2) {
     }
 
     return function (dispatch) {
-      dispatch(request.apply(undefined, params));
+      request && dispatch(request.apply(undefined, params));
       return fn.apply(undefined, params).then(function (response) {
         return dispatch(success(response));
       }).catch(function (error) {
@@ -47,8 +47,10 @@ var createActionCreator = function createActionCreator(name) {
 };
 
 var wrapInActionCreator = function wrapInActionCreator(value) {
-  return typeof value === 'string' ? createActionCreator(value) : value;
+  return typeof value === 'function' ? value : createActionCreator(value);
 };
 
 exports.promiseDispatcher = promiseDispatcher;
 exports.createActionCreator = createActionCreator;
+exports.wrapInActionCreator = wrapInActionCreator;
+exports.promiseDispatchCreator = promiseDispatchCreator;
