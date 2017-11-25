@@ -29,9 +29,9 @@ var promiseDispatchCreator = function promiseDispatchCreator(fn, _ref2) {
     return function (dispatch) {
       request && dispatch(request.apply(undefined, params));
       return fn.apply(undefined, params).then(function (response) {
-        return dispatch(success(response));
+        return dispatch(success.apply(undefined, [response].concat(params)));
       }).catch(function (error) {
-        return dispatch(failure(error));
+        return dispatch(failure.apply(undefined, [error].concat(params)));
       });
     };
   };

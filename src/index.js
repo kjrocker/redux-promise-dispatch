@@ -12,8 +12,8 @@ const promiseDispatchCreator = (fn, { request, success, failure }) => (...params
   return dispatch => {
     request && dispatch(request(...params));
     return fn(...params)
-      .then(response => dispatch(success(response)))
-      .catch(error => dispatch(failure(error)));
+      .then(response => dispatch(success(response, ...params)))
+      .catch(error => dispatch(failure(error, ...params)));
   };
 };
 

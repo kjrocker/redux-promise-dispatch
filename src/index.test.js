@@ -108,3 +108,28 @@ describe('dispatchPromise passes the correct payload params', () => {
     });
   });
 });
+
+describe('dispatchPromise passes the request params to everything', () => {
+  const simplePromiseSpy = sinon.spy(simplePromise);
+  const promiseSuccessSpy = sinon.spy(promiseSuccess);
+  const promiseFailureSpy = sinon.spy(promiseFailure);
+
+  const dispatchPromise = promiseDispatcher(simplePromiseSpy, {
+    success: promiseSuccessSpy,
+    failure: promiseFailureSpy
+  });
+
+  it('passes request params to the success action', () => {
+    const store = mockStore({});
+    return store.dispatch(dispatchPromise(2)).then(() => {
+      expect(promiseSuccessSpy.calledWith('2 is Even!', 2)).to.be.true;
+    });
+  });
+
+  it('passes request params to the failure action', () => {
+    const store = mockStore({});
+    return store.dispatch(dispatchPromise(3)).then(() => {
+      expect(promiseFailureSpy.calledWith('Ouch, 3 is odd!', 3)).to.be.true;
+    });
+  });
+});
