@@ -16,6 +16,11 @@ const simplePromise = value => {
   });
 };
 
+const promiseEvents = name => ({
+  request: createActionCreator(`${name}_REQUEST`),
+  success: createActionCreator(`${name}_SUCCESS`),
+  failure: createActionCreator(`${name}_FAILURE`)
+});
 const promiseRequest = createActionCreator('PROMISE_REQUEST');
 const promiseSuccess = createActionCreator('PROMISE_SUCCESS');
 const promiseFailure = createActionCreator('PROMISE_FAILURE');
@@ -46,7 +51,48 @@ describe('dispatchPromise with all actions', () => {
   it('dispatches the failure action', () => {
     const expectedActions = [promiseRequest(3), promiseFailure('Ouch, 3 is odd!')];
     const store = mockStore({});
-    return store.dispatch(dispatchPromise(3)).then(() => {
+    return store.dispatch(dispatchPromise(3)).catch(() => {
+      expect(store.getActions()).to.deep.equal(expectedActions);
+    });
+  });
+});
+//this allows you to use promiseDispatcher on a promiseDispatcher
+describe('dispatchPromise with all actions that were wrapped x2', () => {
+  const primary = promiseEvents('PRIMARY');
+  const secondary = promiseEvents('SECONDARY');
+  const baseDispatchPromise = promiseDispatcher(simplePromise, primary);
+  const dispatchPromise = promiseDispatcher(baseDispatchPromise, secondary);
+
+  it('dispatches the request action', () => {
+    const expectedActions = secondary.request(2);
+    const store = mockStore({});
+    return store.dispatch(dispatchPromise(2)).then(() => {
+      expect(store.getActions()[0]).to.deep.equal(expectedActions);
+    });
+  });
+
+  it('dispatches the success action', () => {
+    const expectedActions = [
+      secondary.request(2),
+      primary.request(2),
+      primary.success('2 is Even!'),
+      secondary.success('2 is Even!')
+    ];
+    const store = mockStore({});
+    return store.dispatch(dispatchPromise(2)).then(() => {
+      expect(store.getActions()).to.deep.equal(expectedActions);
+    });
+  });
+
+  it('dispatches the failure action', () => {
+    const expectedActions = [
+      secondary.request(3),
+      primary.request(3),
+      primary.failure('Ouch, 3 is odd!'),
+      secondary.failure('Ouch, 3 is odd!')
+    ];
+    const store = mockStore({});
+    return store.dispatch(dispatchPromise(3)).catch(() => {
       expect(store.getActions()).to.deep.equal(expectedActions);
     });
   });
@@ -69,7 +115,7 @@ describe('dispatchPromise without the request action', () => {
   it('dispatches the failure action', () => {
     const expectedActions = [promiseFailure('Ouch, 3 is odd!')];
     const store = mockStore({});
-    return store.dispatch(dispatchPromise(3)).then(() => {
+    return store.dispatch(dispatchPromise(3)).catch(() => {
       expect(store.getActions()).to.deep.equal(expectedActions);
     });
   });
@@ -103,7 +149,7 @@ describe('dispatchPromise passes the correct payload params', () => {
 
   it('passes reject to the failure action', () => {
     const store = mockStore({});
-    return store.dispatch(dispatchPromise(3)).then(() => {
+    return store.dispatch(dispatchPromise(3)).catch(() => {
       expect(promiseFailureSpy.calledWith('Ouch, 3 is odd!')).to.be.true;
     });
   });
@@ -128,7 +174,7 @@ describe('dispatchPromise passes the request params to everything', () => {
 
   it('passes request params to the failure action', () => {
     const store = mockStore({});
-    return store.dispatch(dispatchPromise(3)).then(() => {
+    return store.dispatch(dispatchPromise(3)).catch(() => {
       expect(promiseFailureSpy.calledWith('Ouch, 3 is odd!', 3)).to.be.true;
     });
   });

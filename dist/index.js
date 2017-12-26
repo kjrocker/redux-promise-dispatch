@@ -26,16 +26,41 @@ var promiseDispatchCreator = function promiseDispatchCreator(fn, _ref2) {
       params[_key] = arguments[_key];
     }
 
-    return function (dispatch) {
+    return function (dispatch, getState) {
       request && dispatch(request.apply(undefined, params));
-      return fn.apply(undefined, params).then(function (response) {
-        return dispatch(success.apply(undefined, [response].concat(params)));
-      }).catch(function (error) {
-        return dispatch(failure.apply(undefined, [error].concat(params)));
+      //capture result.
+      var result = fn.apply(undefined, params);
+      //we're we passed a promise?
+      if (!result.then) {
+        //no? ok, we must need to dispatch it.
+        result = result(dispatch, getState);
+      }
+      return new Promise(function (resolve, reject) {
+        result.then(function (response) {
+          dispatch(success.apply(undefined, [response].concat(params)));
+          resolve(response);
+        }).catch(function (error) {
+          dispatch(failure.apply(undefined, [error].concat(params)));
+          reject(error);
+        });
       });
     };
   };
 };
+// const promiseDispatchCreator2 = (fn, { request, success, failure }) => (...params) => dispatch =>
+//   //adding a return promise so that we can do promise channing
+//   new Promise((resolve, reject) => {
+//     request && dispatch(request(...params));
+//     Promise.resolve(fn(...params))
+//       .then(response => {
+//         dispatch(success(response, ...params));
+//         resolve(response);
+//       })
+//       .catch(error => {
+//         dispatch(failure(error, ...params));
+//         reject(error);
+//       });
+//   });
 
 var createActionCreator = function createActionCreator(name) {
   return function (payload) {
