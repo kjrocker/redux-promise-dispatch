@@ -8,11 +8,18 @@ const promiseDispatcher = (fn, { request, success, failure }) => {
 
 // Take a method (from our API service), params, and three named action creators
 // Execute the standard (request -> success | failure) action cycle for that api call
-const promiseDispatchCreator = (fn, { request, success, failure }) => (...params) => dispatch =>
-  //adding a return promise so that we can do promise channing
-  new Promise((resolve, reject) => {
-    request && dispatch(request(...params));
-    return fn(...params)
+const promiseDispatchCreator = (fn, { request, success, failure }) => (...params) => (dispatch, getState) => {
+  request && dispatch(request(...params));
+  //capture result.
+  let result = fn(...params);
+  //did we get a promise?
+  if (!result.then) {
+    //no? ok, we must need to dispatch it.
+    result = result(dispatch, getState);
+  }
+  //in order for someone to handle success/error we need to create a promise for all dispatch creators.
+  return new Promise((resolve, reject) => {
+    result
       .then(response => {
         dispatch(success(response, ...params));
         resolve(response);
@@ -22,6 +29,7 @@ const promiseDispatchCreator = (fn, { request, success, failure }) => (...params
         reject(error);
       });
   });
+};
 
 const createActionCreator = name => payload => {
   return {
