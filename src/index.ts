@@ -28,9 +28,10 @@ type PromiseFn = (...args: any[]) => Promise<any>;
 
 type ReduxThunk<P = any> = (dispatch: Function, getState: Function) => P;
 
-type PromiseReturningThunk = ReduxThunk<Promise<any>>;
+type PromiseReturningThunk<P = any> = ReduxThunk<Promise<P>>;
 
-const promiseDispatcher: PromiseDispatcher<UnsafeActionSet> = (fn, { request, success, failure }) => {
+type UnsafeDispatch = PromiseDispatcher<UnsafeActionSet>;
+const promiseDispatcher: UnsafeDispatch = (fn, { request, success, failure }) => {
   return promiseDispatchCreator(fn, {
     request: request === undefined ? undefined : wrapInActionCreator(request),
     success: wrapInActionCreator(success),
@@ -38,18 +39,14 @@ const promiseDispatcher: PromiseDispatcher<UnsafeActionSet> = (fn, { request, su
   });
 };
 
-// Take a method (from our API service), params, and three named action creators
-// Execute the standard (request -> success | failure) action cycle for that api call
-const promiseDispatchCreator: PromiseDispatcher<ActionSet> = (fn, { request, success, failure }) => (
-  ...params: any[]
-) => {
+type SafeDispatch = PromiseDispatcher<ActionSet>;
+const promiseDispatchCreator: SafeDispatch = (fn, { request, success, failure }) => (...params: any[]) => {
   return (dispatch, getState) => {
     request !== undefined ? dispatch(request(...params)) : null;
 
-    let result = fn(...params);
+    let result = fn.apply(this, params);
     let promiseResult: Promise<any>;
     if (!(result instanceof Promise)) {
-      //no? ok, we must need to dispatch it.
       promiseResult = result(dispatch, getState);
     } else {
       promiseResult = result;
