@@ -1,6 +1,6 @@
 type ReduxAction = { type: string; payload: any };
 
-type ActionCreator = (args?: any) => ReduxAction;
+type ActionCreator = (args?: any) => ReduxAction | ReduxThunk;
 
 type UnsafeActionCreator = string | ActionCreator;
 
@@ -20,9 +20,15 @@ type wrapInActionCreator = (x: UnsafeActionCreator) => ActionCreator;
 
 type createActionCreator = (n: string) => ActionCreator;
 
-type promiseDispatcher = (fn: Function, obj: UnsafeActionSet) => any;
+type promiseDispatcher = (fn: Function, obj: UnsafeActionSet) => PromiseDispatch;
 
-type promiseDispatchCreator = (fn: Function, obj: ActionSet) => any;
+type promiseDispatchCreator = (fn: Function, obj: ActionSet) => PromiseDispatch;
+
+type PromiseDispatch = (...args: any[]) => PromiseReturningThunk;
+
+type PromiseReturningThunk = (dispatch: Function, getState: any) => Promise<any>;
+
+type ReduxThunk = (dispatch: Function, getState: any) => any;
 
 const promiseDispatcher: promiseDispatcher = (fn, { request, success, failure }) => {
   return promiseDispatchCreator(fn, {
@@ -35,7 +41,7 @@ const promiseDispatcher: promiseDispatcher = (fn, { request, success, failure })
 // Take a method (from our API service), params, and three named action creators
 // Execute the standard (request -> success | failure) action cycle for that api call
 const promiseDispatchCreator: promiseDispatchCreator = (fn, { request, success, failure }) => (...params: any[]) => {
-  return (dispatch: Function, getState: any) => {
+  return (dispatch, getState) => {
     request !== undefined ? dispatch(request(...params)) : null;
     //capture result.
     let result = fn(...params);
