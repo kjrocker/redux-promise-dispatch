@@ -20,17 +20,17 @@ type wrapInActionCreator = (x: UnsafeActionCreator) => ActionCreator;
 
 type createActionCreator = (n: string) => ActionCreator;
 
-type promiseDispatcher = (fn: Function, obj: UnsafeActionSet) => PromiseDispatch;
-
-type promiseDispatchCreator = (fn: Function, obj: ActionSet) => PromiseDispatch;
+type PromiseDispatcher<Set> = (fn: PromiseFn | PromiseDispatch, obj: Set) => PromiseDispatch;
 
 type PromiseDispatch = (...args: any[]) => PromiseReturningThunk;
 
-type PromiseReturningThunk = (dispatch: Function, getState: any) => Promise<any>;
+type PromiseFn = (...args: any[]) => Promise<any>;
 
-type ReduxThunk = (dispatch: Function, getState: any) => any;
+type ReduxThunk<P = any> = (dispatch: Function, getState: Function) => P;
 
-const promiseDispatcher: promiseDispatcher = (fn, { request, success, failure }) => {
+type PromiseReturningThunk = ReduxThunk<Promise<any>>;
+
+const promiseDispatcher: PromiseDispatcher<UnsafeActionSet> = (fn, { request, success, failure }) => {
   return promiseDispatchCreator(fn, {
     request: request === undefined ? undefined : wrapInActionCreator(request),
     success: wrapInActionCreator(success),
@@ -40,19 +40,24 @@ const promiseDispatcher: promiseDispatcher = (fn, { request, success, failure })
 
 // Take a method (from our API service), params, and three named action creators
 // Execute the standard (request -> success | failure) action cycle for that api call
-const promiseDispatchCreator: promiseDispatchCreator = (fn, { request, success, failure }) => (...params: any[]) => {
+const promiseDispatchCreator: PromiseDispatcher<ActionSet> = (fn, { request, success, failure }) => (
+  ...params: any[]
+) => {
   return (dispatch, getState) => {
     request !== undefined ? dispatch(request(...params)) : null;
-    //capture result.
+
     let result = fn(...params);
-    //did we get a promise?
-    if (!result.then) {
+    let promiseResult: Promise<any>;
+    if (!(result instanceof Promise)) {
       //no? ok, we must need to dispatch it.
-      result = result(dispatch, getState);
+      promiseResult = result(dispatch, getState);
+    } else {
+      promiseResult = result;
     }
+
     //in order for someone to handle success/error we need to create a promise for all dispatch creators.
     return new Promise((resolve, reject) => {
-      result
+      promiseResult
         .then((response: any) => {
           dispatch(success(response, ...params));
           resolve(response);
