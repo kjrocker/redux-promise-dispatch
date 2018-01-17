@@ -32,6 +32,11 @@ export type PromiseReturningThunk = (dispatch: Function, getState: Function) => 
 
 export type ReduxThunk = (dispatch: Function, getState: Function) => any;
 
+//this function will resolve the generic type for the given promise/dispatch function
+export const functionResolver = <FunctionType extends PromiseFunction>(handler: PromiseDispatch | PromiseFunction) => {
+  return handler as FunctionType;
+};
+
 export const promiseDispatcher = <FunctionType extends PromiseFunction>(
   fn: FunctionType,
   { request, success, failure }: UnsafeActionSet
@@ -41,11 +46,6 @@ export const promiseDispatcher = <FunctionType extends PromiseFunction>(
     success: wrapInActionCreator(success),
     failure: wrapInActionCreator(failure)
   });
-};
-
-//this function will resolve the generic type for the given promise/dispatch function
-export const functionResolver = <FunctionType extends PromiseFunction>(handler: PromiseDispatch | PromiseFunction) => {
-  return handler as FunctionType;
 };
 
 // Take a method (from our API service), params, and three named action creators
