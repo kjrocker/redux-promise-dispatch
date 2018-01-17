@@ -36,6 +36,7 @@ describe('dispatchPromise with all actions', () => {
     const expectedActions = promiseRequest(2);
     const store = mockStore({});
     return store.dispatch(dispatchPromise(2)).then(() => {
+      console.log(store.getActions()[0]);
       expect(store.getActions()[0]).to.deep.equal(expectedActions);
     });
   });
