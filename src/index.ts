@@ -26,11 +26,16 @@ type promiseDispatchCreator = (fn: Function, obj: ActionSet) => PromiseDispatch;
 
 type PromiseDispatch = (...args: any[]) => PromiseReturningThunk;
 
-type PromiseReturningThunk = (dispatch: Function, getState: any) => Promise<any>;
+type PromiseFunction = (...args: any[]) => Promise<any>;
 
-type ReduxThunk = (dispatch: Function, getState: any) => any;
+type PromiseReturningThunk = (dispatch: Function, getState: Function) => Promise<any>;
 
-const promiseDispatcher: promiseDispatcher = (fn, { request, success, failure }) => {
+type ReduxThunk = (dispatch: Function, getState: Function) => any;
+
+const promiseDispatcher = <FunctionType extends PromiseFunction>(
+  fn: FunctionType,
+  { request, success, failure }: UnsafeActionSet
+) => {
   return promiseDispatchCreator(fn, {
     request: request === undefined ? undefined : wrapInActionCreator(request),
     success: wrapInActionCreator(success),
@@ -38,13 +43,21 @@ const promiseDispatcher: promiseDispatcher = (fn, { request, success, failure })
   });
 };
 
+//this function will resolve the generic type for the given promise/dispatch function
+const functionResolver = <FunctionType extends PromiseFunction>(handler: PromiseDispatch | PromiseFunction) => {
+  return handler as FunctionType;
+};
+
 // Take a method (from our API service), params, and three named action creators
 // Execute the standard (request -> success | failure) action cycle for that api call
-const promiseDispatchCreator: promiseDispatchCreator = (fn, { request, success, failure }) => (...params: any[]) => {
-  return (dispatch, getState) => {
+const promiseDispatchCreator = <FunctionType extends PromiseFunction>(
+  fn: FunctionType,
+  { request, success, failure }: ActionSet
+) => {
+  const reduxDispatchFunction = (...params: any[]) => (dispatch: Function, getState: Function) => {
     request !== undefined ? dispatch(request(...params)) : null;
     //capture result.
-    let result = fn(...params);
+    let result = fn.apply(this, ...params);
     //did we get a promise?
     if (!result.then) {
       //no? ok, we must need to dispatch it.
@@ -63,8 +76,8 @@ const promiseDispatchCreator: promiseDispatchCreator = (fn, { request, success, 
         });
     });
   };
+  return functionResolver<FunctionType>(reduxDispatchFunction);
 };
-
 const createActionCreator: createActionCreator = name => payload => {
   return {
     type: name,
