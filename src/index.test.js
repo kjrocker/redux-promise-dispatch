@@ -2,7 +2,7 @@ import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { promiseDispatcher, createActionCreator } from './index';
+import { promiseDispatcher, createActionCreator } from '../es/index';
 
 const middlewares = [thunk];
 const mockStore = configureMockStore(middlewares);

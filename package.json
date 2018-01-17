@@ -22,12 +22,18 @@
     "ts": "ts-node src/",
     "prepublishOnly": "npm run build"
   },
-  "keywords": ["redux", "redux-thunk", "promises"],
+  "keywords": [
+    "redux",
+    "redux-thunk",
+    "promises"
+  ],
   "peerDependencies": {
     "redux": "^3.7.2",
     "redux-thunk": "^2.2.0"
   },
   "devDependencies": {
+    "babel-preset-es2015": "^6.24.1",
+    "babel-register": "^6.26.0",
     "chai": "^3.5.0",
     "mocha": "^3.1.2",
     "redux": "^3.7.2",
@@ -38,7 +44,10 @@
     "ts-node": "^4.1.0",
     "typescript": "^2.6.2"
   },
-  "files": ["es", "lib"],
+  "files": [
+    "es",
+    "lib"
+  ],
   "author": "Kevin Rocker",
   "license": "MIT",
   "types": "./lib/index.d.ts",

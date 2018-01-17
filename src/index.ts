@@ -1,38 +1,38 @@
-type ReduxAction = { type: string; payload: any };
+export type ReduxAction = { type: string; payload: any };
 
-type ActionCreator = (args?: any) => ReduxAction | ReduxThunk;
+export type ActionCreator = (args?: any) => ReduxAction | ReduxThunk;
 
-type UnsafeActionCreator = string | ActionCreator;
+export type UnsafeActionCreator = string | ActionCreator;
 
-interface ActionSet {
+export interface ActionSet {
   request?: ActionCreator;
   success: ActionCreator;
   failure: ActionCreator;
 }
 
-interface UnsafeActionSet {
+export interface UnsafeActionSet {
   request?: UnsafeActionCreator;
   success: UnsafeActionCreator;
   failure: UnsafeActionCreator;
 }
 
-type wrapInActionCreator = (x: UnsafeActionCreator) => ActionCreator;
+export type wrapInActionCreator = (x: UnsafeActionCreator) => ActionCreator;
 
-type createActionCreator = (n: string) => ActionCreator;
+export type createActionCreator = (n: string) => ActionCreator;
 
-type promiseDispatcher = (fn: Function, obj: UnsafeActionSet) => PromiseDispatch;
+export type promiseDispatcher = (fn: Function, obj: UnsafeActionSet) => PromiseDispatch;
 
-type promiseDispatchCreator = (fn: Function, obj: ActionSet) => PromiseDispatch;
+export type promiseDispatchCreator = (fn: Function, obj: ActionSet) => PromiseDispatch;
 
-type PromiseDispatch = (...args: any[]) => PromiseReturningThunk;
+export type PromiseDispatch = (...args: any[]) => PromiseReturningThunk;
 
-type PromiseFunction = (...args: any[]) => Promise<any>;
+export type PromiseFunction = (...args: any[]) => Promise<any>;
 
-type PromiseReturningThunk = (dispatch: Function, getState: Function) => Promise<any>;
+export type PromiseReturningThunk = (dispatch: Function, getState: Function) => Promise<any>;
 
-type ReduxThunk = (dispatch: Function, getState: Function) => any;
+export type ReduxThunk = (dispatch: Function, getState: Function) => any;
 
-const promiseDispatcher = <FunctionType extends PromiseFunction>(
+export const promiseDispatcher = <FunctionType extends PromiseFunction>(
   fn: FunctionType,
   { request, success, failure }: UnsafeActionSet
 ) => {
@@ -44,13 +44,13 @@ const promiseDispatcher = <FunctionType extends PromiseFunction>(
 };
 
 //this function will resolve the generic type for the given promise/dispatch function
-const functionResolver = <FunctionType extends PromiseFunction>(handler: PromiseDispatch | PromiseFunction) => {
+export const functionResolver = <FunctionType extends PromiseFunction>(handler: PromiseDispatch | PromiseFunction) => {
   return handler as FunctionType;
 };
 
 // Take a method (from our API service), params, and three named action creators
 // Execute the standard (request -> success | failure) action cycle for that api call
-const promiseDispatchCreator = <FunctionType extends PromiseFunction>(
+export const promiseDispatchCreator = <FunctionType extends PromiseFunction>(
   fn: FunctionType,
   { request, success, failure }: ActionSet
 ) => {
@@ -78,15 +78,13 @@ const promiseDispatchCreator = <FunctionType extends PromiseFunction>(
   };
   return functionResolver<FunctionType>(reduxDispatchFunction);
 };
-const createActionCreator: createActionCreator = name => payload => {
+export const createActionCreator: createActionCreator = name => payload => {
   return {
     type: name,
     payload: payload
   };
 };
 
-const wrapInActionCreator: wrapInActionCreator = value => {
+export const wrapInActionCreator: wrapInActionCreator = value => {
   return typeof value === 'function' ? value : createActionCreator(value);
 };
-
-export { promiseDispatcher, createActionCreator, wrapInActionCreator, promiseDispatchCreator };
