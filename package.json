@@ -18,15 +18,11 @@
     "test": "mocha --compilers js:babel-core/register ./src/**/*.test.js",
     "test:single": "mocha --compilers js:babel-core/register",
     "build:commonjs": "rimraf lib && tsc --target es5 --outDir lib --module commonjs --declaration",
-    "build:es": "rimraf es && tsc --target es6 --outDir es --module es6",
+    "build:es": "rimraf es && tsc --target es6 --outDir es --module es6 --declaration",
     "ts": "ts-node src/",
     "prepublishOnly": "npm run build"
   },
-  "keywords": [
-    "redux",
-    "redux-thunk",
-    "promises"
-  ],
+  "keywords": ["redux", "redux-thunk", "promises"],
   "peerDependencies": {
     "redux": "^3.7.2",
     "redux-thunk": "^2.2.0"
@@ -44,10 +40,7 @@
     "ts-node": "^4.1.0",
     "typescript": "^2.6.2"
   },
-  "files": [
-    "es",
-    "lib"
-  ],
+  "files": ["es", "lib"],
   "author": "Kevin Rocker",
   "license": "MIT",
   "types": "./lib/index.d.ts",
