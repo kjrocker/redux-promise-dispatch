@@ -54,18 +54,21 @@ export const promiseDispatchCreator = <FunctionType extends PromiseFunction>(
   fn: FunctionType,
   { request, success, failure }: ActionSet
 ) => {
-  const reduxDispatchFunction = (...params: any[]) => (dispatch: Function, getState: Function) => {
+  const reduxDispatchFunction: PromiseDispatch = (...params) => (dispatch, getState) => {
     request !== undefined ? dispatch(request(...params)) : null;
     //capture result.
-    let result = fn.apply(this, ...params);
+    let result = fn(...params);
+    let promiseResult: Promise<any>;
     //did we get a promise?
-    if (!result.then) {
+    if (!(result instanceof Promise)) {
       //no? ok, we must need to dispatch it.
-      result = result(dispatch, getState);
+      promiseResult = result(dispatch, getState);
+    } else {
+      promiseResult = result;
     }
     //in order for someone to handle success/error we need to create a promise for all dispatch creators.
     return new Promise((resolve, reject) => {
-      result
+      promiseResult
         .then((response: any) => {
           dispatch(success(response, ...params));
           resolve(response);

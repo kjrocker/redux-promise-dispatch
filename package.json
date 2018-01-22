@@ -18,7 +18,7 @@
     "test": "mocha --compilers js:babel-core/register ./src/**/*.test.js",
     "test:single": "mocha --compilers js:babel-core/register",
     "build:commonjs": "rimraf lib && tsc --target es5 --outDir lib --module commonjs --declaration",
-    "build:es": "rimraf es && tsc --target es6 --outDir es --module es6",
+    "build:es": "rimraf es && tsc --target es6 --outDir es --module es6 --declaration",
     "ts": "ts-node src/",
     "prepublishOnly": "npm run build"
   },
