@@ -1,6 +1,6 @@
 {
   "name": "redux-promise-dispatch",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Simplifying promises with redux and redux-thunk",
   "main": "./lib/index.js",
   "repository": {
@@ -22,7 +22,11 @@
     "ts": "ts-node src/",
     "prepublishOnly": "npm run build"
   },
-  "keywords": ["redux", "redux-thunk", "promises"],
+  "keywords": [
+    "redux",
+    "redux-thunk",
+    "promises"
+  ],
   "peerDependencies": {
     "redux": "^3.7.2",
     "redux-thunk": "^2.2.0"
@@ -40,7 +44,10 @@
     "ts-node": "^4.1.0",
     "typescript": "^2.6.2"
   },
-  "files": ["es", "lib"],
+  "files": [
+    "es",
+    "lib"
+  ],
   "author": "Kevin Rocker",
   "license": "MIT",
   "types": "./lib/index.d.ts",
