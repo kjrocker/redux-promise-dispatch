@@ -1,13 +1,9 @@
 {
   "compilerOptions": {
-    "lib": [
-      "es6"
-    ],
+    "lib": ["es6"],
     "alwaysStrict": true,
     "strictNullChecks": true,
     "noImplicitAny": true
   },
-  "files": [
-    "src/index.ts"
-  ]
+  "exclude": ["src/*.test.ts", "dist", "es"]
 }
