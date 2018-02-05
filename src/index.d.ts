@@ -1,33 +1,39 @@
+export interface Action {
+  type: any;
+}
+
+export type ReduxThunk<T = any> = (dispatch: Function, getState: Function) => T;
+
+export type PromiseReturningThunk<T = any> = ReduxThunk<Promise<T>>;
+
+export type ActionCreator = (args?: any) => Action | ReduxThunk;
+
+export type UnsafeActionCreator = string | ActionCreator;
+
 export type wrapInActionCreator = (x: UnsafeActionCreator) => ActionCreator;
 
 export type createActionCreator = (n: string) => ActionCreator;
-
-export type promiseDispatcher = (fn: Function, obj: UnsafeActionSet) => PromiseDispatch;
-
-export type promiseDispatchCreator = (fn: Function, obj: ActionSet) => PromiseDispatch;
 
 export type PromiseDispatch = (...args: any[]) => PromiseReturningThunk;
 
 export type PromiseFunction = (...args: any[]) => Promise<any>;
 
-export type PromiseReturningThunk = (dispatch: Function, getState: Function) => Promise<any>;
+export type EventualPromise = PromiseDispatch | PromiseFunction;
 
-export type ReduxThunk = (dispatch: Function, getState: Function) => any;
+export type EnsurePromise = (
+  a: PromiseReturningThunk | Promise<any>,
+  dispatch: Function,
+  getState: Function
+) => Promise<any>;
 
-export type ReduxAction = { type: string; payload: any };
-
-export type ActionCreator = (args?: any) => ReduxAction | ReduxThunk;
-
-export type UnsafeActionCreator = string | ActionCreator;
-
-export interface ActionSet {
+export type ActionSet = {
   request?: ActionCreator;
   success: ActionCreator;
   failure: ActionCreator;
-}
+};
 
-export interface UnsafeActionSet {
+export type UnsafeActionSet = {
   request?: UnsafeActionCreator;
   success: UnsafeActionCreator;
   failure: UnsafeActionCreator;
-}
+};

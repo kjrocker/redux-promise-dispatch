@@ -1,14 +1,15 @@
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 import { expect } from 'chai';
-import sinon from 'sinon';
-import { promiseDispatcher, createActionCreator } from '../es/index';
+import {spy} from 'sinon';
+import { createActionCreator } from './helpers';
+import {promiseDispatcher} from './index'
 
 const middlewares = [thunk];
 const mockStore = configureMockStore(middlewares);
 
 // Straight from the README
-const simplePromise = value => {
+const simplePromise = (value: number) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       return value % 2 === 0 ? resolve(`${value} is Even!`) : reject(`Ouch, ${value} is odd!`);
@@ -16,7 +17,7 @@ const simplePromise = value => {
   });
 };
 
-const promiseThunk = value => (dispatch, getState) => {
+const promiseThunk = (value: number) => (dispatch, getState) => {
   return Promise.resolve(value);
 };
 
@@ -31,10 +32,10 @@ const promiseSuccess = createActionCreator('PROMISE_SUCCESS');
 const promiseFailure = createActionCreator('PROMISE_FAILURE');
 
 describe('dispatchPromise with promise thunk', () => {
-  const myPromiseSpy = sinon.spy(promiseThunk);
-  const promiseRequestSpy = sinon.spy(promiseRequest);
-  const promiseSuccessSpy = sinon.spy(promiseSuccess);
-  const promiseFailureSpy = sinon.spy(promiseFailure);
+  const myPromiseSpy = spy(promiseThunk);
+  const promiseRequestSpy = spy(promiseRequest);
+  const promiseSuccessSpy = spy(promiseSuccess);
+  const promiseFailureSpy = spy(promiseFailure);
   const myPromiseThunk = promiseDispatcher(myPromiseSpy, {
     request: promiseRequestSpy,
     success: promiseSuccessSpy,
@@ -150,10 +151,10 @@ describe('dispatchPromise without the request action', () => {
 });
 
 describe('dispatchPromise passes the correct payload params', () => {
-  const simplePromiseSpy = sinon.spy(simplePromise);
-  const promiseRequestSpy = sinon.spy(promiseRequest);
-  const promiseSuccessSpy = sinon.spy(promiseSuccess);
-  const promiseFailureSpy = sinon.spy(promiseFailure);
+  const simplePromiseSpy = spy(simplePromise);
+  const promiseRequestSpy = spy(promiseRequest);
+  const promiseSuccessSpy = spy(promiseSuccess);
+  const promiseFailureSpy = spy(promiseFailure);
   const dispatchPromise = promiseDispatcher(simplePromiseSpy, {
     request: promiseRequestSpy,
     success: promiseSuccessSpy,
@@ -184,9 +185,9 @@ describe('dispatchPromise passes the correct payload params', () => {
 });
 
 describe('dispatchPromise passes the request params to everything', () => {
-  const simplePromiseSpy = sinon.spy(simplePromise);
-  const promiseSuccessSpy = sinon.spy(promiseSuccess);
-  const promiseFailureSpy = sinon.spy(promiseFailure);
+  const simplePromiseSpy = spy(simplePromise);
+  const promiseSuccessSpy = spy(promiseSuccess);
+  const promiseFailureSpy = spy(promiseFailure);
 
   const dispatchPromise = promiseDispatcher(simplePromiseSpy, {
     success: promiseSuccessSpy,

@@ -1,32 +1,22 @@
-//this function will resolve the generic type for the given promise/dispatch function
-export const functionResolver = (handler: any) => {
-  return handler;
-};
+import {EventualPromise, ActionSet, UnsafeActionSet, PromiseDispatch} from './index.d'
+import {wrapInActionCreator, typeResolver, ensurePromise} from './helpers'
 
-export const promiseDispatcher = (fn: any, { request, success, failure }: any) => {
-  return promiseDispatchCreator(fn, {
+export const promiseDispatcher = <FunctionType extends EventualPromise>(fn: FunctionType, { request, success, failure }: UnsafeActionSet) => {
+  const readyForDispatch = promiseDispatchCreator(fn, {
     request: request === undefined ? undefined : wrapInActionCreator(request),
     success: wrapInActionCreator(success),
     failure: wrapInActionCreator(failure)
   });
+  return typeResolver<FunctionType>(readyForDispatch)
 };
 
 // Take a method (from our API service), params, and three named action creators
 // Execute the standard (request -> success | failure) action cycle for that api call
-export const promiseDispatchCreator = (fn: any, { request, success, failure }: any) => {
-  const reduxDispatchFunction: any = (...params: any[]) => (dispatch: any, getState: any) => {
+export const promiseDispatchCreator = (fn: EventualPromise, { request, success, failure }: ActionSet) => {
+  const reduxDispatchFunction: PromiseDispatch = (...params: any[]) => (dispatch, getState) => {
     request !== undefined ? dispatch(request(...params)) : null;
-    //capture result.
     let result = fn(...params);
-    let promiseResult: any;
-    //did we get a promise?
-    if (!(result instanceof Promise)) {
-      //no? ok, we must need to dispatch it.
-      promiseResult = result(dispatch, getState);
-    } else {
-      promiseResult = result;
-    }
-    //in order for someone to handle success/error we need to create a promise for all dispatch creators.
+    let promiseResult = ensurePromise(result, dispatch, getState);
     return new Promise((resolve, reject) => {
       promiseResult
         .then((response: any) => {
@@ -39,15 +29,8 @@ export const promiseDispatchCreator = (fn: any, { request, success, failure }: a
         });
     });
   };
-  return functionResolver(reduxDispatchFunction);
-};
-export const createActionCreator: any = (name: any) => (payload: any) => {
-  return {
-    type: name,
-    payload: payload
-  };
+  return reduxDispatchFunction;
 };
 
-export const wrapInActionCreator = (value: any) => {
-  return typeof value === 'function' ? value : createActionCreator(value);
-};
+
+
