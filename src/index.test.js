@@ -16,14 +16,42 @@ const simplePromise = value => {
   });
 };
 
+const promiseThunk = value => (dispatch, getState) => {
+  return Promise.resolve(value);
+};
+
 const promiseEvents = name => ({
   request: createActionCreator(`${name}_REQUEST`),
   success: createActionCreator(`${name}_SUCCESS`),
   failure: createActionCreator(`${name}_FAILURE`)
 });
+
 const promiseRequest = createActionCreator('PROMISE_REQUEST');
 const promiseSuccess = createActionCreator('PROMISE_SUCCESS');
 const promiseFailure = createActionCreator('PROMISE_FAILURE');
+
+describe('dispatchPromise with promise thunk', () => {
+  const myPromiseSpy = sinon.spy(promiseThunk);
+  const promiseRequestSpy = sinon.spy(promiseRequest);
+  const promiseSuccessSpy = sinon.spy(promiseSuccess);
+  const promiseFailureSpy = sinon.spy(promiseFailure);
+  const myPromiseThunk = promiseDispatcher(myPromiseSpy, {
+    request: promiseRequestSpy,
+    success: promiseSuccessSpy,
+    failure: promiseFailureSpy
+  });
+
+  it('dispatches the request action w/ value', () => {
+    const expectedActions = [promiseRequest(2), promiseSuccess(2)];
+    const store = mockStore({});
+    return store.dispatch(myPromiseThunk(2)).then(() => {
+      expect(promiseSuccessSpy.calledWith(2)).to.be.true;
+      expect(promiseRequestSpy.calledWith(2)).to.be.true;
+      expect(myPromiseSpy.calledWith(2)).to.be.true;
+      expect(store.getActions()).to.deep.equal(expectedActions);
+    });
+  });
+});
 
 describe('dispatchPromise with all actions', () => {
   const dispatchPromise = promiseDispatcher(simplePromise, {
