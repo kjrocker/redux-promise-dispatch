@@ -1,46 +1,9 @@
-export type ReduxAction = { type: string; payload: any };
-
-export type ActionCreator = (args?: any) => ReduxAction | ReduxThunk;
-
-export type UnsafeActionCreator = string | ActionCreator;
-
-export interface ActionSet {
-  request?: ActionCreator;
-  success: ActionCreator;
-  failure: ActionCreator;
-}
-
-export interface UnsafeActionSet {
-  request?: UnsafeActionCreator;
-  success: UnsafeActionCreator;
-  failure: UnsafeActionCreator;
-}
-
-export type wrapInActionCreator = (x: UnsafeActionCreator) => ActionCreator;
-
-export type createActionCreator = (n: string) => ActionCreator;
-
-export type promiseDispatcher = (fn: Function, obj: UnsafeActionSet) => PromiseDispatch;
-
-export type promiseDispatchCreator = (fn: Function, obj: ActionSet) => PromiseDispatch;
-
-export type PromiseDispatch = (...args: any[]) => PromiseReturningThunk;
-
-export type PromiseFunction = (...args: any[]) => Promise<any>;
-
-export type PromiseReturningThunk = (dispatch: Function, getState: Function) => Promise<any>;
-
-export type ReduxThunk = (dispatch: Function, getState: Function) => any;
-
 //this function will resolve the generic type for the given promise/dispatch function
-export const functionResolver = <FunctionType extends PromiseFunction>(handler: PromiseDispatch | PromiseFunction) => {
-  return handler as FunctionType;
+export const functionResolver = (handler: any) => {
+  return handler;
 };
 
-export const promiseDispatcher = <FunctionType extends PromiseFunction>(
-  fn: FunctionType,
-  { request, success, failure }: UnsafeActionSet
-) => {
+export const promiseDispatcher = (fn: any, { request, success, failure }: any) => {
   return promiseDispatchCreator(fn, {
     request: request === undefined ? undefined : wrapInActionCreator(request),
     success: wrapInActionCreator(success),
@@ -50,15 +13,12 @@ export const promiseDispatcher = <FunctionType extends PromiseFunction>(
 
 // Take a method (from our API service), params, and three named action creators
 // Execute the standard (request -> success | failure) action cycle for that api call
-export const promiseDispatchCreator = <FunctionType extends PromiseFunction>(
-  fn: FunctionType,
-  { request, success, failure }: ActionSet
-) => {
-  const reduxDispatchFunction: PromiseDispatch = (...params) => (dispatch, getState) => {
+export const promiseDispatchCreator = (fn: any, { request, success, failure }: any) => {
+  const reduxDispatchFunction: any = (...params: any[]) => (dispatch: any, getState: any) => {
     request !== undefined ? dispatch(request(...params)) : null;
     //capture result.
     let result = fn(...params);
-    let promiseResult: Promise<any>;
+    let promiseResult: any;
     //did we get a promise?
     if (!(result instanceof Promise)) {
       //no? ok, we must need to dispatch it.
@@ -79,15 +39,15 @@ export const promiseDispatchCreator = <FunctionType extends PromiseFunction>(
         });
     });
   };
-  return functionResolver<FunctionType>(reduxDispatchFunction);
+  return functionResolver(reduxDispatchFunction);
 };
-export const createActionCreator: createActionCreator = name => payload => {
+export const createActionCreator: any = (name: any) => (payload: any) => {
   return {
     type: name,
     payload: payload
   };
 };
 
-export const wrapInActionCreator: wrapInActionCreator = value => {
+export const wrapInActionCreator = (value: any) => {
   return typeof value === 'function' ? value : createActionCreator(value);
 };
