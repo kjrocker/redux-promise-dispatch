@@ -1,5 +1,5 @@
-import {wrapInActionCreator as wrapFn, createActionCreator as createFn} from './index.d'
-import { EventualPromise, EnsurePromise } from './index.d'
+import {wrapInActionCreator as wrapFn, createActionCreator as createFn} from './types'
+import { EventualPromise, EnsurePromise } from './types'
 import { EventEmitter } from 'events';
 
 export const createActionCreator: createFn = (name) => (payload) => {

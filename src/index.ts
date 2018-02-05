@@ -1,4 +1,4 @@
-import {EventualPromise, ActionSet, UnsafeActionSet, PromiseDispatch} from './index.d'
+import {EventualPromise, ActionSet, UnsafeActionSet, PromiseDispatch} from './types'
 import {wrapInActionCreator, typeResolver, ensurePromise} from './helpers'
 
 export const promiseDispatcher = <FunctionType extends EventualPromise>(fn: FunctionType, { request, success, failure }: UnsafeActionSet) => {
