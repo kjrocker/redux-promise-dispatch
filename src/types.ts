@@ -2,7 +2,7 @@ export interface Action {
   type: any;
 }
 
-export type ReduxThunk<T = any> = (dispatch: Function, getState: Function) => T;
+export type ReduxThunk<T = any> = (dispatch: Function, getState?: Function) => T;
 
 export type PromiseReturningThunk<T = any> = ReduxThunk<Promise<T>>;
 
