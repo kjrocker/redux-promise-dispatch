@@ -6,7 +6,7 @@ export type ReduxThunk<T = any> = (dispatch: Function, getState?: Function) => T
 
 export type PromiseReturningThunk<T = any> = ReduxThunk<Promise<T>>;
 
-export type ActionCreator = (args?: any) => Action | ReduxThunk;
+export type ActionCreator = (...args: any[]) => Action | ReduxThunk;
 
 export type UnsafeActionCreator = string | ActionCreator;
 
