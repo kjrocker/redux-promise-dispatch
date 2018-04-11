@@ -79,3 +79,7 @@ const wrappedPromise = promiseDispatcher(interestingPromise, {
 // Dispatch to redux, provide the starting arguments
 dispatch(wrappedPromise(2))
 ```
+
+License
+-------
+MIT
