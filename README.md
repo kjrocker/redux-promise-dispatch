@@ -1,17 +1,23 @@
 # redux-promise-dispatch
 
-A straightforward yet flexible wrapper for promises and redux actions.
+A straightforward yet flexible wrapper for asynchronously generating redux actions. `redux-promise-dispatch` dispatches actions at the beginning and successful completion (`resolve`) or failure `(reject)` of a promise.
 
-Let's get to the examples! I'm going to use plain strings for my action types. If you do this in a real codebase, I'm going to glare at you through the internet.
+For example, the start, or `request` action, is fired when you first call the action creator. This can be used for tasks like marking a `fetching` flag as `true`.
 
-## Super Basic Usage
+The `success` action is dispatched when the promise resolves, and the `failure` action is dispatched if the promise rejects. The result of your promise as well as any arguments passed into the original
+
+## Examples 
+
+### Super Basic Usage
 
 You're going to need exactly four things.
-1. A function that returns a promise
+
+1. A function that returns a promise.
+
 2. Three action creators
-  * One to dispatch before the promise starts
-  * One to dispatch when the promise resolves/succeeds
-  * One to dispatch when the promise rejects/fails
+  * One to dispatch before the promise starts (`request`)
+  * One to dispatch when the promise resolves/succeeds (`success`)
+  * One to dispatch when the promise rejects/fails (`failure`)
 
 ```js
 // Something that returns a promise
@@ -22,12 +28,12 @@ const timedPromise = () => {
 }
 
 // Redux actions for promise start/success/failure
-const startingPromise = () => ({type: "PROMISE START"})
-const successfulPromise = () => ({type: "PROMISE SUCCESS"})
-const failedPromise = () => ({type: "PROMISE FAILURE"})
+const startingPromise = () => ({type: "PROMISE_START"})
+const successfulPromise = () => ({type: "PROMISE_SUCCESS"})
+const failedPromise = () => ({type: "PROMISE_FAILURE"})
 
 // Define the wrapped promise (secretly just a thunk)
-const wrappedPromise = promiseDispatcher(timedPromise, {
+const yourAction = promiseDispatcher(timedPromise, {
   request: startingPromise,
   success: successfulPromise,
   failure: failedPromise
@@ -36,48 +42,49 @@ const wrappedPromise = promiseDispatcher(timedPromise, {
 // Dispatch the wrapped action to redux
 // Dispatches the start action, starts the promise,
 // dispatches success/failure actions as needed
-dispatch(wrappedPromise())
+dispatch(yourAction()) // In this example only the action types make it to the reducer
 ```
 
 ## Basic Usage
 
-Okay, that was really boring, and we didn't even touch on what `promiseDispatcher` does with arguments.
+Okay, that was really boring, and we didn't even touch on what `promiseDispatcher` does with arguments. This example will show you how to pass arguments and use them throughout the lifecycle of your promise and its results.
 
 Now we're going to make some changes
-1. Let the promise returning function have arguments
-2. Let the initial action take the same arguments
-3. Let the success action take the results of `resolve`
-4. Let the failure action take the results of `reject`
-5. We're going to pass the arguments from `1` when we call the wrapped action
+1. Have the promise returning function (`promiseToExecute`) to take a value.
+2. Have the initial action (`request`) also use the value passed to `promiseToExecute`.
+3. Have the success action (`success`) use the results of `resolve`.
+4. Have the failure action (`failure`) use the results of `reject`.
+5. We're also going to pass the value we gave `promiseToExecute` when we call the wrapped action.
 
 ```js
 // Take some arguments, return a promise
-const interestingPromise = (value) => {
+const promiseToExecute = (value) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      return value % 2 === 0 ? resolve(`${value} is Even!`) : reject(`Ouch, ${value} is odd!`)
+      return value % 2 === 0 ? resolve(`${value} is even!`) : reject(`${value} is odd!`)
     }, 500)
   })
 }
 
 // Action creator with the same arguments as the above function
-const startingPromise = (value) => ({type: "PROMISE START", payload: value})
+const promiseStarted = (value) => ({type: "PROMISE_START", payload: value})
 
 // Action creator that takes the result of promise success
-const successfulPromise = (text) => ({type: "PROMISE SUCCESS", payload: text})
+const promiseResolved = (result) => ({type: "PROMISE_SUCCESS", payload: result})
 
 // Action creator that takes the result of promise failure
-const failedPromise = (text) => ({type: "PROMISE FAILURE", payload: text})
+const promiseRejected = (result) => ({type: "PROMISE_FAILURE", payload: result})
 
-// Define the wrapped promise (secretly just a thunk)
-const wrappedPromise = promiseDispatcher(interestingPromise, {
-  request: startingPromise,
-  success: successfulPromise,
-  failure: failedPromise
+// Define the wrapped promise
+const actionToExecute = promiseDispatcher(promiseToExecute, {
+  request: promiseStarted,
+  success: promiseResolved,
+  failure: promiseRejected
 })
 
 // Dispatch to redux, provide the starting arguments
-dispatch(wrappedPromise(2))
+dispatch(actionToExecute(2))  // promiseStarted --> action.payload = 2
+                              // promiseResolved --> action.payload = "2 is even!"
 ```
 
 License
