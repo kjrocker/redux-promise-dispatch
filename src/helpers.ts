@@ -1,6 +1,6 @@
-import {wrapInActionCreator as wrapFn, createActionCreator as createFn} from './types'
-import { EventualPromise, EnsurePromise } from './types'
 import { EventEmitter } from 'events';
+import { createActionCreator as createFn, wrapInActionCreator as wrapFn } from './types';
+import { EnsurePromise, EventualPromise } from './types';
 
 export const createActionCreator: createFn = (name) => (payload) => {
   return {
@@ -18,10 +18,10 @@ export const typeResolver = <FunctionType extends EventualPromise>(fn: EventualP
 };
 
 export const ensurePromise: EnsurePromise = (result, dispatch, getState) => {
-  if (!(result instanceof Promise)) {
+  if (typeof result === 'function') {
     //no? ok, we must need to dispatch it.
     return result(dispatch, getState);
   } else {
     return result;
   }
-}
+};
